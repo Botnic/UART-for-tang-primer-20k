@@ -3,14 +3,15 @@ USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.NUMERIC_STD.ALL;
 
 ENTITY toplevel IS
-    PORT(clk, RST, RX : IN STD_LOGIC;
-         TX : OUT STD_LOGIC
-        );
+    PORT(
+        clk, RST, RX : IN STD_LOGIC;
+        TX : OUT STD_LOGIC
+    );
 END ENTITY;
 
 ARCHITECTURE behavior OF toplevel IS
 TYPE state IS (IDLE, RECEIVE, SENDINPUT, INPUT, SENDASCII, ASCII, SENDHEX, HEX);
-SIGNAL currentState, nextState : state;
+SIGNAL currentState : state;
 
 CONSTANT CR : STD_LOGIC_VECTOR := x"0D"; --Carriage Return
 CONSTANT LF : STD_LOGIC_VECTOR := x"0A"; --Line Feed
@@ -91,11 +92,11 @@ BEGIN
         IF RISING_EDGE(clk) THEN
             CASE currentState IS
             WHEN IDLE => IF NOT RX THEN
-                nextState <= RECEIVE;
+                currentState <= RECEIVE;
             END IF;
             WHEN RECEIVE => IF rx_valid THEN
                 tx_valid <= '1';
-                nextState <= SENDINPUT;
+                currentState <= SENDINPUT;
             END IF;
             WHEN SENDINPUT => dataString <= "Input: ";
                 dataLogic <= STR2SLV(dataString);
@@ -109,7 +110,7 @@ BEGIN
                     END IF;
                 ELSIF tx_valid AND tx_ready THEN
                     strCount <= 0;
-                    nextState <= INPUT;
+                    currentState <= INPUT;
                 ELSIF NOT tx_valid THEN
                     tx_valid <= '1';
                 END IF;
@@ -124,7 +125,7 @@ BEGIN
                     END IF;
                 ELSIF tx_valid AND tx_ready THEN
                     inCount <= 0;
-                    nextState <= SENDASCII;
+                    currentState <= SENDASCII;
                 ELSIF NOT tx_valid THEN
                     tx_valid <= '1';
                 END IF;
@@ -140,7 +141,7 @@ BEGIN
                     END IF;
                 ELSIF tx_valid AND tx_ready THEN
                     strCount <= 0;
-                    nextState <= ASCII;
+                    currentState <= ASCII;
                 ELSIF NOT tx_valid THEN
                     tx_valid <= '1';
                 END IF;
@@ -157,7 +158,7 @@ BEGIN
                     END IF;
                 ELSIF tx_valid AND tx_ready THEN
                     asCount <= 0;
-                    nextState <= SENDHEX;
+                    currentState <= SENDHEX;
                 ELSIF NOT tx_valid THEN
                     tx_valid <= '1';
                 END IF;
@@ -173,7 +174,7 @@ BEGIN
                     END IF;
                 ELSIF tx_valid AND tx_ready THEN
                     strCount <= 0;
-                    nextState <= HEX;
+                    currentState <= HEX;
                 ELSIF NOT tx_valid THEN
                     tx_valid <= '1';
                 END IF;
@@ -189,7 +190,7 @@ BEGIN
                     END IF;
                 ELSIF tx_valid AND tx_ready THEN
                     hexCount <= 0;
-                    nextState <= IDLE;
+                    currentState <= IDLE;
                 ELSIF NOT tx_valid THEN
                     tx_valid <= '1';
                 END IF;
@@ -204,7 +205,6 @@ BEGIN
             tx_in <= dataInput(23 - inCount * 8 DOWNTO 16 - inCount * 8);
             tx_asc <= dataAscii(39 - asCount * 8 DOWNTO 32 - asCount * 8);
             tx_hex <= dataHex(31 - hexCount * 8 DOWNTO 24 - hexCount * 8);
-            currentState <= nextState;
         END IF;
     END PROCESS;
 

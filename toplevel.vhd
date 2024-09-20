@@ -13,12 +13,12 @@ ARCHITECTURE behavior OF toplevel IS
 TYPE state IS (IDLE, RECEIVE, SENDINPUT, INPUT, SENDASCII, ASCII, SENDHEX, HEX);
 SIGNAL currentState : state;
 
-CONSTANT CR : STD_LOGIC_VECTOR := x"0D"; --Carriage Return
-CONSTANT LF : STD_LOGIC_VECTOR := x"0A"; --Line Feed
-CONSTANT BS : STD_LOGIC_VECTOR := x"08"; --Backspace
-CONSTANT ESC : STD_LOGIC_VECTOR := x"1B"; --Escape
-CONSTANT SP : STD_LOGIC_VECTOR := x"20"; --Space
-CONSTANT DEL  : STD_LOGIC_VECTOR := x"7F"; --Delete
+CONSTANT CR : STD_LOGIC_VECTOR (7 DOWNTO 0) := x"0D"; --Carriage Return
+CONSTANT LF : STD_LOGIC_VECTOR (7 DOWNTO 0) := x"0A"; --Line Feed
+CONSTANT BS : STD_LOGIC_VECTOR (7 DOWNTO 0) := x"08"; --Backspace
+CONSTANT ESC : STD_LOGIC_VECTOR (7 DOWNTO 0) := x"1B"; --Escape
+CONSTANT SP : STD_LOGIC_VECTOR (7 DOWNTO 0) := x"20"; --Space
+CONSTANT DEL  : STD_LOGIC_VECTOR (7 DOWNTO 0) := x"7F"; --Delete
 
 SIGNAL rx_data : STD_LOGIC_VECTOR (7 DOWNTO 0);
 SIGNAL rx_valid : STD_LOGIC;
@@ -30,7 +30,7 @@ SIGNAL tx_valid : STD_LOGIC;
 SIGNAL dataString : STRING (7 DOWNTO 1);
 SIGNAL dataLogic : STD_LOGIC_VECTOR (55 DOWNTO 0);
 
-SIGNAL dataInput : STD_LOGIC_VECTOR (23 DOWNTO 0) := x"--" & CR & LF;
+SIGNAL dataInput : STD_LOGIC_VECTOR (23 DOWNTO 0);
 SIGNAL dataAscii : STD_LOGIC_VECTOR (39 DOWNTO 0) := x"--" & x"--" & x"--" & CR & LF;
 SIGNAL dataHex : STD_LOGIC_VECTOR (31 DOWNTO 0) := x"--" & x"--" & CR & LF;
 
@@ -114,7 +114,8 @@ BEGIN
                 ELSIF NOT tx_valid THEN
                     tx_valid <= '1';
                 END IF;
-            WHEN INPUT => dataInput(23 DOWNTO 16) <= rx_data;
+            WHEN INPUT =>
+                dataInput(23 DOWNTO 16) <= rx_data & CR & CF;
                 tx_data <= BITSHIFT(tx_in);
                 IF tx_valid = '1' AND tx_ready = '1' AND inCount < 2 THEN
                     IF counter /= 1 THEN

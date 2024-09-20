@@ -198,15 +198,10 @@ BEGIN
         END IF;
     END PROCESS;
 
-    PROCESS(ALL)
-    BEGIN
-        IF RISING_EDGE(clk) THEN
-            tx_str <= dataLogic(55 - strCount * 8 DOWNTO 48 - strCount * 8);
-            tx_in <= dataInput(23 - inCount * 8 DOWNTO 16 - inCount * 8);
-            tx_asc <= dataAscii(39 - asCount * 8 DOWNTO 32 - asCount * 8);
-            tx_hex <= dataHex(31 - hexCount * 8 DOWNTO 24 - hexCount * 8);
-        END IF;
-    END PROCESS;
+    tx_str <= dataLogic(55 - strCount * 8 DOWNTO 48 - strCount * 8);
+    tx_in <= dataInput(23 - inCount * 8 DOWNTO 16 - inCount * 8);
+    tx_asc <= dataAscii(39 - asCount * 8 DOWNTO 32 - asCount * 8);
+    tx_hex <= dataHex(31 - hexCount * 8 DOWNTO 24 - hexCount * 8);
 
     uartrx : UART_RX PORT MAP (clk => clk, reset => RST, rx_IN => RX, rx_valid => rx_valid, rx_data => rx_data);
     uarttx : UART_TX PORT MAP (clk => clk, reset => RST, tx_valid => tx_valid, tx_data => tx_data, tx_ready => tx_ready, tx_OUT => TX);
